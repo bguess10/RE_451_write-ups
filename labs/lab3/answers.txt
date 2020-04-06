@@ -1,0 +1,3 @@
+q1 = 567
+q2 = just the fibonacci sequence
+

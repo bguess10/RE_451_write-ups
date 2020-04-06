@@ -1,0 +1,35 @@
+digraph challenge2 {
+    graph [labeljust="l"];
+    node [labeljust="l"; fontname="courier"; shape="rect"; style="filled, rounded";];
+    subgraph cluster_cla {
+        style="filled, rounded";
+        color="lightblue";
+        label="Check number of command line arguments";
+
+        cla_check[
+            label="add     esp, 0x10\lcmp     dword [ebx], 1\ljg      0x80486c9\l"
+        ]
+
+        bad_cla[
+            label="...\l"
+        ]
+    }
+
+    check_password[
+        label="sub     esp, 4\lpush    8          ; 8 ; size_t n\llea     edx, [s2]\lpush    edx        ; const char *s2\lpush    eax        ; const char *s1\lcall    strncmp    ; sym.imp.strncmp ; int strncmp(const char *s1, const char *s2, size_t n)\ladd     esp, 0x10\ltest    eax, eax\ljne     0x80486f7\l"
+    ]
+
+    good_password [
+        label="sub     esp, 0xc\lpush    str.You_are_amazing ; 0x80487c4 ; const char *s\lcall    puts       ; sym.imp.puts ; int puts(const char *s)\ladd     esp, 0x10\l"
+    ]
+
+    bad_password [
+        label="...\l"
+    ]
+
+    cla_check -> check_password [label="ZF=0, SF=OF"]
+    cla_check -> bad_cla [label="ZF!=0 or SF!=OF"]
+    check_password -> good_password [label="ZF=1"]
+    check_password -> bad_password [label="ZF=0"]
+
+}

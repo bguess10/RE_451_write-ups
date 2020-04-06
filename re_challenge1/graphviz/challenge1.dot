@@ -1,0 +1,79 @@
+digraph challenge1 {
+    graph [labeljust="l"];
+    node [labeljust="l"; fontname="courier"; shape="rect"; style="filled, rounded";];
+    subgraph cluster_cla {
+        style="filled, rounded";
+        color="lightyellow";
+        label="Check the command line arguments";
+        check_cla [label="cmp     dword [eax], 3\lje      0x804859b\l"]
+        bad_cla [label="..."]
+        check_cla -> bad_cla [label="ZF=0"]
+    }
+
+    subgraph cluster_loop {
+        style="filled, rounded";
+        color="lightblue";
+        label="Loop";
+        
+        loop_inner_cond_1 [
+            label="sub     esp, 0xc\lpush    0xc        ; 12\lcall    f1         ; sym.f1\ladd     esp, 0x10\lcmp     eax, dword [var_98h]\ljne     0x8048623\l"
+        ]
+
+        str_check1 [
+            label="add     esp, 0x10\lmov     eax, dword [s2]\ladd     eax, 4\lmov     eax, dword [eax]\lsub     esp, 4\lpush    0x14       ; 20 ; size_t n\lpush    eax        ; const char *s2\llea     eax, [format]\lpush    eax        ; const char *s1\lcall    strncmp    ; sym.imp.strncmp ; int strncmp(const char *s1, const char *s2, size_t n)\ladd     esp, 0x10\ltest    eax, eax\ljne     0x8048675\l"
+        ]
+
+        str_check1_succ [
+            label="add     dword [var_94h], 1\l"
+        ]
+
+        loop_inner_cond_2 [
+            label="sub     esp, 0xc\lpush    0xd        ; 13\lcall    f2         ; sym.f2\ladd     esp, 0x10\lcmp     eax, dword [var_98h]\ljne     0x8048675\l"
+        ]
+
+        str_check2 [
+            label="add     esp, 0x10\lmov     eax, dword [s2]\ladd     eax, 8\lmov     eax, dword [eax]\lsub     esp, 4\lpush    0xc        ; 12 ; size_t n\lpush    eax        ; const char *s2\llea     eax, [format]\lpush    eax        ; const char *s1\lcall    strncmp    ; sym.imp.strncmp ; int strncmp(const char *s1, const char *s2, size_t n)\ladd     esp, 0x10\ltest    eax, eax\ljne     0x8048675\l"
+        ]
+
+        str_check2_succ [
+            label="add     dword [var_94h], 1\l"
+        ]
+
+        loop_inner_cond_1 -> str_check1 [label="ZF=1"];
+        loop_inner_cond_1 -> loop_inner_cond_2 [label="ZF=0"];
+        str_check1 -> str_check1_succ [label="ZF=1"];
+        str_check1_succ -> loop_cond;
+        str_check1 -> loop_cond [label="ZF=0"];
+
+        loop_inner_cond_2 -> str_check2 [label="ZF=1"];
+        loop_inner_cond_2 -> loop_cond [label="ZF=0"];
+        str_check2 -> str_check2_succ [label="ZF=1"];
+        str_check2_succ -> loop_cond;
+        str_check2 -> loop_cond [label="ZF=0"];
+    }
+    
+
+    loop_cond[
+        label="sub     esp, 4\lpush    dword [stream] ; FILE *stream\lpush    0x80       ; 128 ; int size\llea     eax, [format]\lpush    eax        ; char *s\lcall    fgets      ; sym.imp.fgets ; char *fgets(char *s, int size, FILE *stream)\ladd     esp, 0x10\ltest    eax, eax\l"
+    ]
+
+    loop_complete[
+        label="cmp     dword [var_94h], 2\ljne     0x80486c1\l"
+    ]
+
+    you_right [
+        label="sub     esp, 0xc\lpush    str.You_did_it ; 0x8048788 ; const char *s\lcall    puts       ; sym.imp.puts ; int puts(const char *s)\l"
+    ]
+
+    you_wrong [label="..."]
+
+
+    check_cla -> loop_cond [label="ZF=1"];
+    loop_cond -> loop_complete [label="ZF=1"];
+    loop_complete -> you_right [label="ZF=1"];
+    loop_complete -> you_wrong [label="ZF=0"];
+    loop_cond -> loop_inner_cond_1 [label="ZF=0"];
+    
+
+
+}

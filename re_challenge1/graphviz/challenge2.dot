@@ -1,0 +1,24 @@
+digraph challenge1 {
+    graph [labeljust="l"];
+    node [labeljust="l"; fontname="courier"; shape="rect"; style="filled, rounded";];
+
+    get_password [
+        label=" sub     esp, 0xc\l push    str.Input_your_password... ; 0x8048970 ; const char *s\l call    puts       ; sym.imp.puts ; int puts(const char *s)\l add     esp, 0x10\l sub     esp, 0xc\l lea     eax, [s]\l push    eax        ; char *s\l call    gets       ; sym.imp.gets ; char *gets(char *s)\l add     esp, 0x10\l"
+    ]
+
+    check_password [
+        label="add     esp, 0x10\lsub     esp, 4\lpush    8          ; 8 ; size_t n\lpush    dword [s2] ; const char *s2\llea     eax, [s]\lpush    eax        ; const char *s1\lcall    strncmp    ; sym.imp.strncmp ; int strncmp(const char *s1, const char *s2, size_t n)\ladd     esp, 0x10\ltest    eax, eax\ljne     0x80488b3\l"
+    ]
+
+    password_right [
+        label="sub     esp, 0xc \lpush    0x804899f  ; const char *s \lcall    puts       ; sym.imp.puts ; int puts(const char *s)\ladd     esp, 0x10 \l" 
+    ]
+
+    password_wrong [
+        label="sub     esp, 0xc\lpush    str.Oopppss...Wrong_password ; 0x80489b8 ; const char *s\lcall    puts       ; sym.imp.puts ; int puts(const char *s)\ladd     esp, 0x10\l"
+    ]
+
+    get_password -> check_password [label="User provides string"];
+    check_password -> password_right [label="ZF=1"];
+    check_password -> password_wrong [label="ZF=0"];
+}

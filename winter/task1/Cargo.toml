@@ -1,0 +1,9 @@
+[build-dependencies]
+cc = "1.0.48"
+
+[package]
+name = "task_1"
+version = "0.1.0"
+authors = ["bentonguess"]
+edition = "2018"
+build = "src/build.rs"
